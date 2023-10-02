@@ -1,0 +1,130 @@
+CREATE TABLE nomes (
+    nome VARCHAR(50)
+);
+
+INSERT INTO nomes (nome) VALUES
+('Roberta'),
+('Roberto'),
+('Maria Clara'),
+('João');
+
+UPDATE nomes
+SET nome = UPPER(nome);
+SELECT nome, LENGTH(nome) AS tamanho
+FROM nomes;
+
+UPDATE nomes
+SET nome = CONCAT(
+    CASE WHEN nome LIKE '%João%' OR nome LIKE '%Roberto%' THEN 'Sr. ' ELSE 'Sra. ' END,
+    nome
+);
+CREATE TABLE produtos (
+    produto VARCHAR(50),
+    preco DECIMAL(10, 2),
+    quantidade INT
+);
+UPDATE produtos
+SET preco = ROUND(preco, 2);
+
+SELECT produto, ABS(quantidade) AS valor_absoluto
+FROM produtos;
+
+SELECT AVG(preco) AS media_precos
+FROM produtos;
+CREATE TABLE eventos (
+    data_evento DATE
+);
+INSERT INTO eventos (data_evento)
+VALUES (NOW());
+SELECT DATEDIFF('2023-10-02', '2023-09-25') AS dias_entre_datas;
+
+SELECT data_evento, DAYNAME(data_evento) AS nome_dia_semana
+FROM eventos;
+
+SELECT produto,
+       IF(quantidade > 0, 'Em estoque', 'Fora de estoque') AS status_estoque
+FROM produtos;
+
+SELECT produto,
+       CASE
+           WHEN preco < 50 THEN 'Barato'
+           WHEN preco >= 50 AND preco < 100 THEN 'Médio'
+           ELSE 'Caro'
+       END AS categoria_preco
+FROM produtos;
+DELIMITER //
+
+CREATE FUNCTION TOTAL_VALOR(preco DECIMAL(10, 2), quantidade INT)
+RETURNS DECIMAL(10, 2)
+BEGIN
+    DECLARE total DECIMAL(10, 2);
+    SET total = preco * quantidade;
+    RETURN total;
+END;
+//
+DELIMITER ;
+
+SELECT produto, quantidade, preco, TOTAL_VALOR(preco, quantidade) AS valor_total
+FROM produtos;
+SELECT COUNT(*) AS total_produtos
+FROM produtos;
+
+SELECT produto, preco
+FROM produtos
+WHERE preco = (SELECT MAX(preco) FROM produtos);
+SELECT produto, preco
+FROM produtos
+WHERE preco = (SELECT MIN(preco) FROM produtos);
+
+SELECT SUM(IF(quantidade > 0, preco, 0)) AS soma_total_estoque
+FROM produtos;
+
+DELIMITER //
+
+CREATE FUNCTION FATORIAL(n INT)
+RETURNS INT
+BEGIN
+    DECLARE result INT;
+    SET result = 1;
+    WHILE n > 0 DO
+        SET result = result * n;
+        SET n = n - 1;
+    END WHILE;
+    RETURN result;
+END;
+//
+DELIMITER ;
+
+DELIMITER //
+
+CREATE FUNCTION f_exponencial(base DECIMAL(10, 2), expoente INT)
+RETURNS DECIMAL(10, 2)
+BEGIN
+    DECLARE resultado DECIMAL(10, 2);
+    SET resultado = POW(base, expoente);
+    RETURN resultado;
+END;
+//
+DELIMITER ;
+
+DELIMITER //
+
+CREATE FUNCTION is_palindromo(palavra VARCHAR(255))
+RETURNS INT
+BEGIN
+    DECLARE tam INT;
+    DECLARE i INT;
+    DECLARE reverso VARCHAR(255);
+    SET tam = LENGTH(palavra);
+    SET reverso = '';
+    FOR i = tam DOWNTO 1 DO
+        SET reverso = CONCAT(reverso, SUBSTRING(palavra, i, 1));
+    END FOR;
+    IF palavra = reverso THEN
+        RETURN 1; -- É palíndromo
+    ELSE
+        RETURN 0; -- Não é palíndromo
+    END IF;
+END;
+//
+DELIMITER ;
